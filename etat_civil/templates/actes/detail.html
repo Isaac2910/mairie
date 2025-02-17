@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Détails de l'Acte</h2>
+<p><strong>Type:</strong> {{ acte.get_type_acte_display }}</p>
+<p><strong>Numéro:</strong> {{ acte.numero_acte }}</p>
+<p><strong>Date d'enregistrement:</strong> {{ acte.date_enregistrement }}</p>
+<p><strong>Agent responsable:</strong> {{ acte.agent_responsable.username }}</p>
+
+{% if details %}
+    {% if acte.type_acte == "naissance" %}
+        <h3>Informations sur la naissance</h3>
+        <p><strong>Nom:</strong> {{ details.nom }}</p>
+        <p><strong>Prénom:</strong> {{ details.prenom }}</p>
+        <p><strong>Date de naissance:</strong> {{ details.date_naissance }}</p>
+        <p><strong>Lieu:</strong> {{ details.lieu_naissance }}</p>
+        <p><strong>Père:</strong> {{ details.nom_pere }}</p>
+        <p><strong>Mère:</strong> {{ details.nom_mere }}</p>
+    {% elif acte.type_acte == "mariage" %}
+        <h3>Informations sur le mariage</h3>
+        <p><strong>Conjoint 1:</strong> {{ details.nom_conjoint1 }}</p>
+        <p><strong>Conjoint 2:</strong> {{ details.nom_conjoint2 }}</p>
+        <p><strong>Date du mariage:</strong> {{ details.date_mariage }}</p>
+        <p><strong>Lieu:</strong> {{ details.lieu_mariage }}</p>
+    {% elif acte.type_acte == "deces" %}
+        <h3>Informations sur le décès</h3>
+        <p><strong>Nom:</strong> {{ details.nom }}</p>
+        <p><strong>Date de décès:</strong> {{ details.date_deces }}</p>
+        <p><strong>Lieu:</strong> {{ details.lieu_deces }}</p>
+        <p><strong>Cause:</strong> {{ details.cause_deces }}</p>
+    {% endif %}
+{% endif %}
+
+{% if acte.document_pdf %}
+    <a href="{% url 'telecharger_acte' acte.id %}" class="btn btn-primary">Télécharger le PDF</a>
+{% endif %}
+{% endblock %}

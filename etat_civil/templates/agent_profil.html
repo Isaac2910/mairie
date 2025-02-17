@@ -1,0 +1,25 @@
+<!-- agent_profil.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil de l'Agent</title>
+</head>
+<body>
+    <h1>Profil de l'Agent : {{ agent.username }}</h1>
+    
+    <p><strong>Matricule :</strong> {{ agent.matricule }}</p>
+    <p><strong>Fonction :</strong> {{ agent.fonction }}</p>
+    <p><strong>Nom d'utilisateur :</strong> {{ agent.username }}</p>
+    <p><strong>Email :</strong> {{ agent.email }}</p>
+
+    <h2>Autres informations</h2>
+    <ul>
+        <li><strong>Date d'adhésion :</strong> {{ agent.date_joined }}</li>
+        <li><strong>Dernière connexion :</strong> {{ agent.last_login }}</li>
+    </ul>
+
+    <a href="{% url 'dashboard' %}">Retour au tableau de bord</a>
+</body>
+</html>

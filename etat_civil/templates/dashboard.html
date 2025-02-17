@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Tableau de bord</h2>
+
+<!-- Formulaire de filtrage avancé -->
+<form id="filters">
+    <input type="text" id="search" placeholder="Rechercher un acte..." onkeyup="searchActes()">
+    <br><br>
+    
+    <!-- Filtre par type d'acte -->
+    <select id="type_acte" onchange="searchActes()">
+        <option value="">Type d'acte</option>
+        <option value="naissance">Acte de Naissance</option>
+        <option value="mariage">Acte de Mariage</option>
+        <option value="deces">Acte de Décès</option>
+    </select>
+    
+    <!-- Filtre par date -->
+    <input type="date" id="date_debut" onchange="searchActes()">
+    <input type="date" id="date_fin" onchange="searchActes()">
+    
+    <!-- Filtre par agent responsable -->
+    <input type="text" id="agent" placeholder="Agent responsable" onkeyup="searchActes()">
+    <br><br>
+</form>
+
+<!-- Indicateur de chargement -->
+<div id="loader" style="display: none;">🔄 Recherche en cours...</div>
+
+<!-- Tableau des actes -->
+<table>
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Numéro</th>
+            <th>Date d'enregistrement</th>
+            <th>Agent Responsable</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="acte-list">
+        {% for acte in actes %}
+        <tr>
+            <td>{{ acte.get_type_acte_display }}</td>
+            <td>{{ acte.numero_acte }}</td>
+            <td>{{ acte.date_enregistrement }}</td>
+            <td>{{ acte.agent_responsable.username }}</td>
+            <td>
+                <a href="{% url 'detail_acte' acte.id %}">Voir</a>
+                {% if acte.document_pdf %}
+                    <a href="{% url 'telecharger_acte' acte.id %}">Télécharger</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<div id="pagination">
+    <button onclick="prevPage()">⬅️ Précédent</button>
+    <span id="page-number">Page 1</span>
+    <button onclick="nextPage()">Suivant ➡️</button>
+</div>
+
+<!-- Script pour la recherche dynamique et la pagination -->
+<script>
+let currentPage = 1;
+const itemsPerPage = 5;
+let allResults = [];
+
+function searchActes() {
+    let query = document.getElementById("search").value;
+    let typeActe = document.getElementById("type_acte").value;
+    let dateDebut = document.getElementById("date_debut").value;
+    let dateFin = document.getElementById("date_fin").value;
+    let agent = document.getElementById("agent").value;
+
+    document.getElementById("loader").style.display = "block";
+
+    fetch(`/rechercher-actes/?q=${query}&type_acte=${typeActe}&date_debut=${dateDebut}&date_fin=${dateFin}&agent=${agent}`)
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("loader").style.display = "none";
+        allResults = data.results;
+        currentPage = 1;
+        renderTable();
+    });
+}
+
+function renderTable() {
+    let tableBody = document.getElementById("acte-list");
+    tableBody.innerHTML = "";
+    let start = (currentPage - 1) * itemsPerPage;
+    let end = start + itemsPerPage;
+    let results = allResults.slice(start, end);
+
+    results.forEach(acte => {
+        let row = `<tr>
+            <td>${acte.type}</td>
+            <td>${acte.numero}</td>
+            <td>${acte.date}</td>
+            <td>${acte.agent}</td>
+            <td>
+                <a href="/acte/${acte.id}/">Voir</a>
+                ${acte.document_pdf ? `<a href="/telecharger-acte/${acte.id}/">Télécharger</a>` : ''}
+            </td>
+        </tr>`;
+        tableBody.innerHTML += row;
+    });
+
+    document.getElementById("page-number").innerText = `Page ${currentPage}`;
+}
+
+function prevPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+    }
+}
+
+function nextPage() {
+    if (currentPage * itemsPerPage < allResults.length) {
+        currentPage++;
+        renderTable();
+    }
+}
+
+// Charger la liste initialement
+searchActes();
+</script>
+
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #007bff;
+        color: white;
+    }
+
+    input[type="text"], input[type="date"], select {
+        padding: 8px;
+        margin: 5px;
+        border: 1px solid #ccc;
+        width: 200px;
+    }
+
+    #pagination {
+        margin-top: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #pagination button {
+        padding: 8px 12px;
+        margin: 5px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    #pagination button:hover {
+        background-color: #0056b3;
+    }
+
+    #loader {
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 10px;
+    }
+</style>
+
+{% endblock %}
