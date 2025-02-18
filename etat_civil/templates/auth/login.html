@@ -5,103 +5,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion</title>
-    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Style global */
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        .vh-100 {
+          background-color:rgb(2, 6, 61);
         }
-
-        .login-container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            text-align: center;
+        .card {
+            border-radius: 1rem;
         }
-
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        /* Formulaire */
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        form input {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-        }
-
-        form button {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
+        .btn-dark {
+            background-color:rgb(70, 62, 179);
             border: none;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 5px;
         }
-
-        form button:hover {
-            background-color: #45a049;
+        .btn-dark:hover {
+            background-color:rgb(2, 6, 61);
         }
-
-        /* Messages d'erreur */
-        .messages {
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f8d7da;
-            color: #721c24;
-            border-radius: 5px;
-        }
-
-        .messages p {
-            margin: 0;
-            font-size: 14px;
-        }
-
     </style>
 </head>
 <body>
-
-    <div class="login-container">
-        <h2>Connexion</h2>
-
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
+  <section class="vh-100">
+    <div class="container py-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col col-xl-10">
+          <div class="card">
+            <div class="row g-0">
+              <div class="col-md-6 col-lg-5 d-none d-md-block">
+                <img src="{% static 'images/btm.png' %}"
+                  alt="login form" class="img-fluid" style="border-radius: 1rem 0 0 1rem;" />
+              </div>
+              <div class="col-md-6 col-lg-7 d-flex align-items-center">
+                <div class="card-body p-4 p-lg-5 text-black">
+                  <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex align-items-center mb-3 pb-1">
+                      <span class="h1 fw-bold mb-0">Connexion</span>
+                    </div>
+                    {% if messages %}
+                      <div class="alert alert-danger" role="alert">
+                          {% for message in messages %}
+                              <p class="mb-0">{{ message }}</p>
+                          {% endfor %}
+                      </div>
+                    {% endif %}
+                    
+                    <div class="mb-4">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                        {{ form.username }}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
+                        {{ form.password }}
+                    </div>
+                    
+                    <div class="pt-1 mb-4">
+                      <button class="btn btn-dark btn-lg btn-block" type="submit">Se connecter</button>
+                    </div>
+                   
+                  </form>
+                </div>
+              </div>
             </div>
-        {% endif %}
-
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                {{ form.as_p }}
-            </div>
-            <button type="submit">Se connecter</button>
-        </form>
+          </div>
+        </div>
+      </div>
     </div>
-
+  </section>
 </body>
 </html>

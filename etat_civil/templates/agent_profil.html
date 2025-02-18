@@ -1,25 +1,79 @@
-<!-- agent_profil.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil de l'Agent</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #007bff;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        p, li {
+            font-size: 16px;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        a:hover {
+            background: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <h1>Profil de l'Agent : {{ agent.username }}</h1>
-    
-    <p><strong>Matricule :</strong> {{ agent.matricule }}</p>
-    <p><strong>Fonction :</strong> {{ agent.fonction }}</p>
-    <p><strong>Nom d'utilisateur :</strong> {{ agent.username }}</p>
-    <p><strong>Email :</strong> {{ agent.email }}</p>
+    <div class="container">
+        <h1>Profil de l'Agent : {{ agent.username }}</h1>
+        
+        <p><strong>Matricule :</strong> {{ agent.matricule }}</p>
+        <p><strong>Fonction :</strong> {{ agent.fonction }}</p>
+        <p><strong>Nom d'utilisateur :</strong> {{ agent.username }}</p>
+        <p><strong>Email :</strong> {{ agent.email }}</p>
 
-    <h2>Autres informations</h2>
-    <ul>
-        <li><strong>Date d'adhésion :</strong> {{ agent.date_joined }}</li>
-        <li><strong>Dernière connexion :</strong> {{ agent.last_login }}</li>
-    </ul>
+        <h2>Autres informations</h2>
+        <ul>
+            <li><strong>Date d'adhésion :</strong> {{ agent.date_joined }}</li>
+            <li><strong>Dernière connexion :</strong> {{ agent.last_login }}</li>
+        </ul>
 
-    <a href="{% url 'dashboard' %}">Retour au tableau de bord</a>
+        <a href="{% url 'dashboard' %}">Retour</a>
+    </div>
 </body>
 </html>

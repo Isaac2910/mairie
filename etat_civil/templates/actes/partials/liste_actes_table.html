@@ -1,0 +1,59 @@
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Type</th>
+            <th>Numéro</th>
+            <th>Date Enregistrement</th>
+            <th>Agent Responsable</th>
+            <th>Document</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for acte in actes %}
+        <tr>
+            <td>{{ acte.get_type_acte_display }}</td>
+            <td>{{ acte.numero_acte }}</td>
+            <td>{{ acte.date_enregistrement|date:"d/m/Y" }}</td>
+            <td>{{ acte.agent_responsable.username|default:"Non assigné" }}</td>
+            <td>
+                {% if acte.document_pdf %}
+                    <a href="{{ acte.document_pdf.url }}" class="btn btn-primary btn-sm" target="_blank">📄 Voir PDF</a>
+                {% else %}
+                    <span class="badge bg-danger">Aucun document</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center">Aucun acte trouvé.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination Bootstrap -->
+<nav aria-label="Pagination">
+    <ul class="pagination justify-content-center">
+        {% if actes.has_previous %}
+            <li class="page-item">
+                <a class="page-link ajax-page" href="?page=1">« Première</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link ajax-page" href="?page={{ actes.previous_page_number }}">‹ Précédente</a>
+            </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link">Page {{ actes.number }} sur {{ actes.paginator.num_pages }}</span>
+        </li>
+
+        {% if actes.has_next %}
+            <li class="page-item">
+                <a class="page-link ajax-page" href="?page={{ actes.next_page_number }}">Suivante ›</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link ajax-page" href="?page={{ actes.paginator.num_pages }}">Dernière »</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>

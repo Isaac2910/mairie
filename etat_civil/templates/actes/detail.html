@@ -1,36 +1,46 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Détails de l'Acte</h2>
-<p><strong>Type:</strong> {{ acte.get_type_acte_display }}</p>
-<p><strong>Numéro:</strong> {{ acte.numero_acte }}</p>
-<p><strong>Date d'enregistrement:</strong> {{ acte.date_enregistrement }}</p>
-<p><strong>Agent responsable:</strong> {{ acte.agent_responsable.username }}</p>
+<div class="container">
+    <h2 class="text-center my-4">Détails de l'Acte</h2>
+    <div class="card p-4 shadow-sm">
+        <p><strong>Type:</strong> <span class="badge bg-info">{{ acte.get_type_acte_display }}</span></p>
+        <p><strong>Numéro:</strong> {{ acte.numero_acte }}</p>
+        <p><strong>Date d'enregistrement:</strong> {{ acte.date_enregistrement }}</p>
+        <p><strong>Agent responsable:</strong> {{ acte.agent_responsable.username }}</p>
 
-{% if details %}
-    {% if acte.type_acte == "naissance" %}
-        <h3>Informations sur la naissance</h3>
-        <p><strong>Nom:</strong> {{ details.nom }}</p>
-        <p><strong>Prénom:</strong> {{ details.prenom }}</p>
-        <p><strong>Date de naissance:</strong> {{ details.date_naissance }}</p>
-        <p><strong>Lieu:</strong> {{ details.lieu_naissance }}</p>
-        <p><strong>Père:</strong> {{ details.nom_pere }}</p>
-        <p><strong>Mère:</strong> {{ details.nom_mere }}</p>
-    {% elif acte.type_acte == "mariage" %}
-        <h3>Informations sur le mariage</h3>
-        <p><strong>Conjoint 1:</strong> {{ details.nom_conjoint1 }}</p>
-        <p><strong>Conjoint 2:</strong> {{ details.nom_conjoint2 }}</p>
-        <p><strong>Date du mariage:</strong> {{ details.date_mariage }}</p>
-        <p><strong>Lieu:</strong> {{ details.lieu_mariage }}</p>
-    {% elif acte.type_acte == "deces" %}
-        <h3>Informations sur le décès</h3>
-        <p><strong>Nom:</strong> {{ details.nom }}</p>
-        <p><strong>Date de décès:</strong> {{ details.date_deces }}</p>
-        <p><strong>Lieu:</strong> {{ details.lieu_deces }}</p>
-        <p><strong>Cause:</strong> {{ details.cause_deces }}</p>
-    {% endif %}
-{% endif %}
+        {% if details %}
+            {% if acte.type_acte == "naissance" %}
+                <h3 class="my-4">Informations sur la naissance</h3>
+                <ul class="list-unstyled">
+                    <li><strong>Nom:</strong> {{ details.nom }}</li>
+                    <li><strong>Prénom:</strong> {{ details.prenom }}</li>
+                    <li><strong>Date de naissance:</strong> {{ details.date_naissance }}</li>
+                    <li><strong>Lieu:</strong> {{ details.lieu_naissance }}</li>
+                    <li><strong>Père:</strong> {{ details.nom_pere }}</li>
+                    <li><strong>Mère:</strong> {{ details.nom_mere }}</li>
+                </ul>
+            {% elif acte.type_acte == "mariage" %}
+                <h3 class="my-4">Informations sur le mariage</h3>
+                <ul class="list-unstyled">
+                    <li><strong>Conjoint 1:</strong> {{ details.nom_conjoint1 }}</li>
+                    <li><strong>Conjoint 2:</strong> {{ details.nom_conjoint2 }}</li>
+                    <li><strong>Date du mariage:</strong> {{ details.date_mariage }}</li>
+                    <li><strong>Lieu:</strong> {{ details.lieu_mariage }}</li>
+                </ul>
+            {% elif acte.type_acte == "deces" %}
+                <h3 class="my-4">Informations sur le décès</h3>
+                <ul class="list-unstyled">
+                    <li><strong>Nom:</strong> {{ details.nom }}</li>
+                    <li><strong>Date de décès:</strong> {{ details.date_deces }}</li>
+                    <li><strong>Lieu:</strong> {{ details.lieu_deces }}</li>
+                    <li><strong>Cause:</strong> {{ details.cause_deces }}</li>
+                </ul>
+            {% endif %}
+        {% endif %}
 
-{% if acte.document_pdf %}
-    <a href="{% url 'telecharger_acte' acte.id %}" class="btn btn-primary">Télécharger le PDF</a>
-{% endif %}
+        {% if acte.document_pdf %}
+            <a href="{% url 'telecharger_acte' acte.id %}" class="btn btn-primary mt-3">Télécharger le PDF</a>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

@@ -22,3 +22,4 @@ urlpatterns = [
  
     path('', include('etat_civil.urls')),
 ]
+

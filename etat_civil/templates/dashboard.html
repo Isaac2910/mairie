@@ -1,233 +1,140 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+
+
 {% block content %}
+    <div class="container mt-4">
+        <h1 class="mb-4 text-center text-primary">Actes d'État Civil</h1>
+        
+        <!-- Formulaire de filtrage -->
+        <form method="get" id="filtre-form" class="mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <input type="text" name="numero_acte" class="form-control" placeholder="Numéro d'acte" value="{{ request.GET.numero_acte }}">
+                </div>
+                <div class="col-md-4">
+                    <select name="type_acte" class="form-control">
+                        <option value="">Tous les types</option>
+                        <option value="naissance" {% if request.GET.type_acte == 'naissance' %}selected{% endif %}>Acte de naissance</option>
+                        <option value="mariage" {% if request.GET.type_acte == 'mariage' %}selected{% endif %}>Mariage</option>
+                        <option value="deces" {% if request.GET.type_acte == 'deces' %}selected{% endif %}>Décès</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                </div>
+            </div>
+        </form>
 
-<h2>Tableau de bord</h2>
+        <!-- Table des actes -->
+        <div id="actes-list">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>Numéro d'Acte</th>
+                        <th>Type d'Acte</th>
+                        <th>Date d'enregistrement</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for acte in actes %}
+                        <tr>
+                            <td>{{ acte.numero_acte }}</td>
+                            <td>{{ acte.type_acte }}</td>
+                            <td>{{ acte.date_enregistrement }}</td>
+                            <td>
+                                <a href="{% url 'detail_acte' acte.id %}" class="btn btn-info btn-sm">Voir le détail</a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">Aucun acte trouvé</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-<!-- Formulaire de filtrage avancé -->
-<form id="filters">
-    <input type="text" id="search" placeholder="Rechercher un acte..." onkeyup="searchActes()">
-    <br><br>
-    
-    <!-- Filtre par type d'acte -->
-    <select id="type_acte" onchange="searchActes()">
-        <option value="">Type d'acte</option>
-        <option value="naissance">Acte de Naissance</option>
-        <option value="mariage">Acte de Mariage</option>
-        <option value="deces">Acte de Décès</option>
-    </select>
-    
-    <!-- Filtre par date -->
-    <input type="date" id="date_debut" onchange="searchActes()">
-    <input type="date" id="date_fin" onchange="searchActes()">
-    
-    <!-- Filtre par agent responsable -->
-    <input type="text" id="agent" placeholder="Agent responsable" onkeyup="searchActes()">
-    <br><br>
-    <button type="button" onclick="resetFilters()">Réinitialiser</button>
-</form>
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div>
+                {% if actes.has_previous %}
+                    <a href="?page=1{% if request.GET.type_acte %}&type_acte={{ request.GET.type_acte }}{% endif %}{% if request.GET.numero_acte %}&numero_acte={{ request.GET.numero_acte }}{% endif %}" class="btn btn-outline-secondary btn-sm">&laquo; Première</a>
+                    <a href="?page={{ actes.previous_page_number }}{% if request.GET.type_acte %}&type_acte={{ request.GET.type_acte }}{% endif %}{% if request.GET.numero_acte %}&numero_acte={{ request.GET.numero_acte }}{% endif %}" class="btn btn-outline-secondary btn-sm">Précédente</a>
+                {% endif %}
+            </div>
 
-<!-- Indicateur de chargement -->
-<div id="loader" style="display: none;">🔄 Recherche en cours...</div>
+            <span class="text-muted">Page {{ actes.number }} sur {{ actes.paginator.num_pages }}</span>
 
-<!-- Tableau des actes -->
-<table>
-    <thead>
-        <tr>
-            <th>Type</th>
-            <th>Numéro</th>
-            <th>Date d'enregistrement</th>
-            <th>Agent Responsable</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody id="acte-list"></tbody>
-</table>
+            <div>
+                {% if actes.has_next %}
+                    <a href="?page={{ actes.next_page_number }}{% if request.GET.type_acte %}&type_acte={{ request.GET.type_acte }}{% endif %}{% if request.GET.numero_acte %}&numero_acte={{ request.GET.numero_acte }}{% endif %}" class="btn btn-outline-secondary btn-sm">Suivante</a>
+                    <a href="?page={{ actes.paginator.num_pages }}{% if request.GET.type_acte %}&type_acte={{ request.GET.type_acte }}{% endif %}{% if request.GET.numero_acte %}&numero_acte={{ request.GET.numero_acte }}{% endif %}" class="btn btn-outline-secondary btn-sm">Dernière &raquo;</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
-<!-- Pagination -->
-<div id="pagination" style="display: none;">
-    <button onclick="prevPage()" id="prevBtn">⬅️ Précédent</button>
-    <span id="page-number">Page 1</span>
-    <button onclick="nextPage()" id="nextBtn">Suivant ➡️</button>
-</div>
+    <script>
+        document.getElementById('filtre-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var form = new FormData(this);
+            var url = new URL(window.location.href);
+            var params = new URLSearchParams(window.location.search);
 
-<!-- Nombre total de résultats -->
-<p id="total-results"></p>
-
-<!-- Script pour la recherche dynamique et la pagination -->
-<script>
-let currentPage = 1;
-const itemsPerPage = 5;
-let allResults = [];
-
-function searchActes() {
-    let query = document.getElementById("search").value;
-    let typeActe = document.getElementById("type_acte").value;
-    let dateDebut = document.getElementById("date_debut").value;
-    let dateFin = document.getElementById("date_fin").value;
-    let agent = document.getElementById("agent").value;
-
-    document.getElementById("loader").style.display = "block";
-
-    fetch(`/rechercher-actes/?q=${query}&type_acte=${typeActe}&date_debut=${dateDebut}&date_fin=${dateFin}&agent=${agent}`)
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Erreur lors de la récupération des données.");
-        }
-        return response.json();
-    })
-    .then(data => {
-        document.getElementById("loader").style.display = "none";
-        if (data.results.length === 0) {
-            document.getElementById("acte-list").innerHTML = "<tr><td colspan='5'>Aucun résultat trouvé.</td></tr>";
-            document.getElementById("pagination").style.display = "none";
-            document.getElementById("total-results").innerText = "";
-        } else {
-            allResults = data.results;
-            currentPage = 1;
-            renderTable();
-        }
-    })
-    .catch(error => {
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("acte-list").innerHTML = `<tr><td colspan='5' style='color: red;'>${error.message}</td></tr>`;
-    });
-}
-
-function renderTable() {
-    let tableBody = document.getElementById("acte-list");
-    tableBody.innerHTML = "";
-    let start = (currentPage - 1) * itemsPerPage;
-    let end = start + itemsPerPage;
-    let results = allResults.slice(start, end);
-
-    results.forEach(acte => {
-        let row = `<tr>
-            <td>${acte.type}</td>
-            <td>${acte.numero}</td>
-            <td>${acte.date}</td>
-            <td>${acte.agent}</td>
-            <td>
-                <a href="/acte/${acte.id}/">Voir</a>
-                ${acte.document_pdf ? `<a href="/telecharger-acte/${acte.id}/">Télécharger</a>` : ''}
-            </td>
-        </tr>`;
-        tableBody.innerHTML += row;
-    });
-
-    document.getElementById("page-number").innerText = `Page ${currentPage}`;
-    document.getElementById("total-results").innerText = `Total des résultats : ${allResults.length}`;
-    updatePagination();
-}
-
-function updatePagination() {
-    let paginationDiv = document.getElementById("pagination");
-    let prevBtn = document.getElementById("prevBtn");
-    let nextBtn = document.getElementById("nextBtn");
-
-    if (allResults.length <= itemsPerPage) {
-        paginationDiv.style.display = "none";
-    } else {
-        paginationDiv.style.display = "flex";
-    }
-
-    prevBtn.disabled = (currentPage === 1);
-    nextBtn.disabled = (currentPage * itemsPerPage >= allResults.length);
-}
-
-function prevPage() {
-    if (currentPage > 1) {
-        currentPage--;
-        renderTable();
-    }
-}
-
-function nextPage() {
-    if (currentPage * itemsPerPage < allResults.length) {
-        currentPage++;
-        renderTable();
-    }
-}
-
-function resetFilters() {
-    document.getElementById("search").value = "";
-    document.getElementById("type_acte").value = "";
-    document.getElementById("date_debut").value = "";
-    document.getElementById("date_fin").value = "";
-    document.getElementById("agent").value = "";
-    searchActes();
-}
-
-// Charger la liste initialement
-searchActes();
-</script>
+            for (var [key, value] of form.entries()) {
+                params.set(key, value);  // Mettre à jour les paramètres de l'URL
+            }
+            
+            // Faire une requête AJAX pour récupérer les actes filtrés
+            fetch(url.pathname + '?' + params.toString(), {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('actes-list').innerHTML = html;  // Mettre à jour la table
+            });
+        });
+    </script>
+{% endblock %}
 
 <style>
+    /* Personnalisation des éléments du tableau */
     table {
-        width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0 10px;
     }
-
-    th, td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-    }
-
     th {
         background-color: #007bff;
         color: white;
     }
-
-    tbody tr:nth-child(odd) {
-        background-color: #f9f9f9;
+    td {
+        background-color: #f8f9fa;
     }
 
-    tbody tr:hover {
-        background-color: #f1f1f1;
+    /* Formulaire de filtrage */
+    #filtre-form input,
+    #filtre-form select,
+    #filtre-form button {
+        border-radius: 0.25rem;
     }
 
-    input[type="text"], input[type="date"], select {
-        padding: 8px;
-        margin: 5px;
-        border: 1px solid #ccc;
-        width: 200px;
+    /* Boutons de pagination */
+    .btn-outline-secondary {
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
     }
 
-    button {
-        padding: 8px 12px;
-        margin: 5px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        cursor: pointer;
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
     }
 
-    button:hover {
-        background-color: #0056b3;
-    }
-
-    button:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
-    }
-
-    #pagination {
-        margin-top: 10px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    #loader {
+    /* Mise en page du titre */
+    h1 {
+        font-size: 2rem;
         font-weight: bold;
-        color: #007bff;
-        margin-bottom: 10px;
-    }
-
-    #total-results {
-        font-weight: bold;
-        margin-top: 10px;
     }
 </style>
-
-{% endblock %}
